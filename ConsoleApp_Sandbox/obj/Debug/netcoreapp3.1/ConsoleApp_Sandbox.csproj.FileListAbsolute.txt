@@ -1,0 +1,12 @@
+/Users/guestfromhome/RiderProjects/ConsoleApp_Sandbox/ConsoleApp_Sandbox/bin/Debug/netcoreapp3.1/ConsoleApp_Sandbox.deps.json
+/Users/guestfromhome/RiderProjects/ConsoleApp_Sandbox/ConsoleApp_Sandbox/bin/Debug/netcoreapp3.1/ConsoleApp_Sandbox.runtimeconfig.json
+/Users/guestfromhome/RiderProjects/ConsoleApp_Sandbox/ConsoleApp_Sandbox/bin/Debug/netcoreapp3.1/ConsoleApp_Sandbox.runtimeconfig.dev.json
+/Users/guestfromhome/RiderProjects/ConsoleApp_Sandbox/ConsoleApp_Sandbox/bin/Debug/netcoreapp3.1/ConsoleApp_Sandbox.dll
+/Users/guestfromhome/RiderProjects/ConsoleApp_Sandbox/ConsoleApp_Sandbox/bin/Debug/netcoreapp3.1/ConsoleApp_Sandbox.pdb
+/Users/guestfromhome/RiderProjects/ConsoleApp_Sandbox/ConsoleApp_Sandbox/obj/Debug/netcoreapp3.1/ConsoleApp_Sandbox.csprojAssemblyReference.cache
+/Users/guestfromhome/RiderProjects/ConsoleApp_Sandbox/ConsoleApp_Sandbox/obj/Debug/netcoreapp3.1/ConsoleApp_Sandbox.csproj.CoreCompileInputs.cache
+/Users/guestfromhome/RiderProjects/ConsoleApp_Sandbox/ConsoleApp_Sandbox/obj/Debug/netcoreapp3.1/ConsoleApp_Sandbox.AssemblyInfoInputs.cache
+/Users/guestfromhome/RiderProjects/ConsoleApp_Sandbox/ConsoleApp_Sandbox/obj/Debug/netcoreapp3.1/ConsoleApp_Sandbox.AssemblyInfo.cs
+/Users/guestfromhome/RiderProjects/ConsoleApp_Sandbox/ConsoleApp_Sandbox/obj/Debug/netcoreapp3.1/ConsoleApp_Sandbox.dll
+/Users/guestfromhome/RiderProjects/ConsoleApp_Sandbox/ConsoleApp_Sandbox/obj/Debug/netcoreapp3.1/ConsoleApp_Sandbox.pdb
+/Users/guestfromhome/RiderProjects/ConsoleApp_Sandbox/ConsoleApp_Sandbox/obj/Debug/netcoreapp3.1/ConsoleApp_Sandbox.genruntimeconfig.cache
