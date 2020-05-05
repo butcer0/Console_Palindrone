@@ -25,7 +25,9 @@ namespace ConsoleApp_Sandbox.AI_Bots.GhostInTheCell
             {
                 int entityCount = int.Parse(Console.ReadLine()); // the number of entities (e.g. factories and troops)
                 int myFactoryId = -1;
+                int myFactoryValue = Int32.MinValue;
                 int enemyFactoryId = -1;
+                int enemyFactoryValue = Int32.MinValue;
                 int troopsNb = 0;
                 for (int i = 0; i < entityCount; i++)
                 {
@@ -43,7 +45,6 @@ namespace ConsoleApp_Sandbox.AI_Bots.GhostInTheCell
                     int arg4 = int.Parse(inputs[5]);
                     int arg5 = int.Parse(inputs[6]);
 
-                    Console.Error.Write("Input: " + entityId.ToString());
                     Console.Error.WriteLine(string.Join(",", inputs));
                     if (entityType.Equals("FACTORY"))
                     {
@@ -52,14 +53,23 @@ namespace ConsoleApp_Sandbox.AI_Bots.GhostInTheCell
                             ignoreFactoryIdCache.Add(entityId);
                         }
 
+                        //Console.Error.WriteLine(string.Format("myFactory: {0} - {1} : compareFactory: {2} - {3}", myFactoryId, myFactoryValue, entityId, arg2));
                         if (arg1 == 1)
                         {
-                            myFactoryId = entityId;
-                            troopsNb = arg2;
+                            if (arg2 > myFactoryValue)
+                            {
+                                myFactoryId = entityId;
+                                myFactoryValue = arg2;
+                                troopsNb = arg2;
+                            }
                         }
                         else
                         {
-                            enemyFactoryId = entityId;
+                            if ((arg3 - arg2) > enemyFactoryValue)
+                            {
+                                enemyFactoryId = entityId;
+                                enemyFactoryValue = (arg3 - arg2);
+                            }
                         }
                     }
                 }
