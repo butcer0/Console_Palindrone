@@ -4,6 +4,7 @@ namespace ConsoleApp_Sandbox.Consts
     {
         PALINDRONE,
         PATHFINDING,
+        COLLATZ,
         EXIT
     }
 }

@@ -3,6 +3,7 @@ using System.Linq;
 using ConsoleApp_Sandbox.Consts;
 using ConsoleApp_Sandbox.Exceptions;
 using ConsoleApp_Sandbox.Puzzles;
+using ConsoleApp_Sandbox.Puzzles.LongestCollatz;
 
 namespace ConsoleApp_Sandbox
 {
@@ -27,6 +28,9 @@ namespace ConsoleApp_Sandbox
                             break;
                         case SANDBOX_APPS.PATHFINDING:
                             PathFindingPuzzle.Run();
+                            break;
+                        case SANDBOX_APPS.COLLATZ:
+                            LongestCollatzPuzzle.Run();
                             break;
                         default:
                             throw new IntendedExitException();
