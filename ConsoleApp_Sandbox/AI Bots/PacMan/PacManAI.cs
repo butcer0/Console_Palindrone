@@ -21,7 +21,7 @@ class Player
     static int[,] PartitionMap;
     static Dictionary<int, int[]> PacMen = new Dictionary<int, int[]>();
     static Dictionary<int, int[]> PacMenTargets = new Dictionary<int, int[]>();
-    static Dictionary<int, int[]> EnemyPacMen = new Dictionary<int, int[]>();
+    // static Dictionary<int, int[]> EnemyPacMen = new Dictionary<int, int[]>();
     static Dictionary<int, List<int[]>> Pellets = new Dictionary<int, List<int[]>>();
     static List<int> PartitionStatus = new List<int>();
 
@@ -78,34 +78,36 @@ class Player
                     if(mine) {
                         PacMen.Add(pacId, new int[3]{x, y, STATUS_AVAILABLE});
                         PacMenTargets.Add(pacId, null);
-                    } else {
-                        EnemyPacMen.Add(pacId, new int[2]{x, y});
-                    }
+                    } 
+                    // else {
+                    //     EnemyPacMen.Add(pacId, new int[2]{x, y});
+                    // }
                 } else {
-                    if(mine) {
+                    if(mine && PacMen.ContainsKey(pacId)) {
                         PacMen[pacId][0] = x;
                         PacMen[pacId][1] = y;
-                    } else {
-                        EnemyPacMen[pacId][0] = x;
-                        EnemyPacMen[pacId][1] = y;
-                    }
+                    } 
+                    // else {
+                    //     EnemyPacMen[pacId][0] = x;
+                    //     EnemyPacMen[pacId][1] = y;
+                    // }
                 }
 
-                 if(mine & PacMen[pacId][2] == STATUS_AVAILABLE) {
+                 if(mine & PacMen.ContainsKey(pacId) && PacMen[pacId][2] == STATUS_AVAILABLE) {
                     Console.Error.WriteLine(string.Format("Getting Partition for: {0}", pacId));
                     PacMen[pacId][2] = getAvailablePartition();
                 }
 
                  if(initialized) {
                     // drop target if hit
-                    if(mine && PacMenTargets[pacId] != null && PacMen[pacId][0] == PacMenTargets[pacId][0] && PacMen[pacId][1] == PacMenTargets[pacId][1]) {
+                    if(mine && PacMenTargets.ContainsKey(pacId) && PacMenTargets[pacId] != null && PacMen.ContainsKey(pacId) && PacMen[pacId][0] == PacMenTargets[pacId][0] && PacMen[pacId][1] == PacMenTargets[pacId][1]) {
                         Console.Error.WriteLine(string.Format("Target Hit: [{0},{1}]-Id: {2}", PacMen[pacId][0],PacMen[pacId][1],pacId));
                         PacMenTargets[pacId] = null;
                     }
 
                     // set target if empty
                     // todo: reintroduce
-                    if(mine && PacMenTargets[pacId] == null) {
+                    if(mine && PacMenTargets.ContainsKey(pacId) && PacMenTargets[pacId] == null) {
                         Console.Error.WriteLine("Getting Pellet "+pacId);
                         PacMenTargets[pacId] = getClosestSubpartitionPellet(PacMen[pacId]);
                         // var pelletFound = getClosestSubpartitionPellet(PacMen[pacId]);
@@ -131,9 +133,10 @@ class Player
             
                 if(!initialized){
                     pelletPartition = PartitionMap[y,x];
-                
-                    Pellets[pelletPartition].Add(new int[3]{x, y, value == 1 ? 1 : SUPER_PELLET_VALUE});
-                    Console.Error.WriteLine(string.Format("Adding Pellet[{0}]: [{1},{2}]: {3}", pelletPartition, x, y, value));
+                    if(Pellets.ContainsKey(pelletPartition)) {
+                        Pellets[pelletPartition].Add(new int[3]{x, y, value == 1 ? 1 : SUPER_PELLET_VALUE});
+                        Console.Error.WriteLine(string.Format("Adding Pellet[{0}]: [{1},{2}]: {3}", pelletPartition, x, y, value));
+                    }
                 }
                     
             }
@@ -182,7 +185,9 @@ class Player
                 // Console.Error.WriteLine(string.Format("Max Pellet updated: [{0},{1}]-{2}", maxPellet[0], maxPellet[1], maxValue));
             }
         }
-        Pellets[pacMan[2]].Remove(maxPellet);
+        if(Pellets.ContainsKey(pacMan[2])){
+            Pellets[pacMan[2]].Remove(maxPellet);
+        }
         
         return maxPellet;
     }
