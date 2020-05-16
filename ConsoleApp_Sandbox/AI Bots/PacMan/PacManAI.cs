@@ -10,17 +10,24 @@ using System.Collections.Generic;
  **/
 class Player
 {
-    const int SUPER_PELLET_VALUE = 7;
+    const int SUPER_PELLET_VALUE = 10;
     const int NUM_PARTITIONS = 6;
     const int STATUS_AVAILABLE = -1;
     const int STATUS_BUSY = 0;
     const int STATUS_COMPLETE = 1;
+    const int BLOCKED_COOLDOWN = 5;
 
+    static Random rGen = new Random();
+    static int[] MapDimensions = new int[2];
     static List<string> Map = new List<string>();
     static int[] PelletsSubParts;
     static int[,] PartitionMap;
     static Dictionary<int, int[]> PacMen = new Dictionary<int, int[]>();
     static Dictionary<int, int[]> PacMenTargets = new Dictionary<int, int[]>();
+    static Dictionary<int, int[]> PacMenStartLocs = new Dictionary<int, int[]>();
+    static Dictionary<int, int[]> PacMenPrevLocs = new Dictionary<int, int[]>();
+    static Dictionary<int, int[]> PacMenBlockLocs = new Dictionary<int, int[]>();
+    static List<int> PacMenBlocked = new List<int>();
     // static Dictionary<int, int[]> EnemyPacMen = new Dictionary<int, int[]>();
     static Dictionary<int, List<int[]>> Pellets = new Dictionary<int, List<int[]>>();
     static List<int> PartitionStatus = new List<int>();
@@ -31,7 +38,7 @@ class Player
         inputs = Console.ReadLine().Split(' ');
         int width = int.Parse(inputs[0]); // size of the grid
         int height = int.Parse(inputs[1]); // top left corner is (x=0, y=0)
-        
+        MapDimensions = new int[2]{width, height};
         PartitionMap = new int[height, width];
         for (int y = 0; y < height; y++)
         {
@@ -59,6 +66,9 @@ class Player
         // game loop
         while (true)
         {
+            PacMenBlocked.Clear();
+            PacMenBlockLocs.Clear();
+
             inputs = Console.ReadLine().Split(' ');
             int myScore = int.Parse(inputs[0]);
             int opponentScore = int.Parse(inputs[1]);
@@ -77,6 +87,8 @@ class Player
                 if(!initialized) {
                     if(mine) {
                         PacMen.Add(pacId, new int[3]{x, y, STATUS_AVAILABLE});
+                        PacMenStartLocs.Add(pacId, new int[3]{x, y, STATUS_AVAILABLE});
+                        PacMenPrevLocs.Add(pacId, new int[3]{x-1, y-1, STATUS_AVAILABLE});
                         PacMenTargets.Add(pacId, null);
                     } 
                     // else {
@@ -86,6 +98,14 @@ class Player
                     if(mine && PacMen.ContainsKey(pacId)) {
                         PacMen[pacId][0] = x;
                         PacMen[pacId][1] = y;
+
+                        if(PacMenPrevLocs.ContainsKey(pacId) 
+                            && PacMen[pacId][2] != STATUS_AVAILABLE
+                            && x == PacMenPrevLocs[pacId][0] && y == PacMenPrevLocs[pacId][1]){
+                            Console.Error.WriteLine(string.Format("Detected Block {0}: [{1},{2}]",pacId,x,y));
+                            PacMenBlocked.Add(pacId);
+                            PacMenBlockLocs.Add(pacId, getRandomLoc());
+                        }
                     } 
                     // else {
                     //     EnemyPacMen[pacId][0] = x;
@@ -106,7 +126,6 @@ class Player
                     }
 
                     // set target if empty
-                    // todo: reintroduce
                     if(mine && PacMenTargets.ContainsKey(pacId) && PacMenTargets[pacId] == null) {
                         Console.Error.WriteLine("Getting Pellet "+pacId);
                         PacMenTargets[pacId] = getClosestSubpartitionPellet(PacMen[pacId]);
@@ -120,6 +139,13 @@ class Player
                         }
                         Console.Error.WriteLine(string.Format("Closest Pellet Found: {0}", PacMenTargets[pacId] != null ? PacMenTargets[pacId][0].ToString():"Error"));
                     } 
+
+                    if(PacMenPrevLocs.ContainsKey(pacId) && PacMen.ContainsKey(pacId)) {
+                        PacMenPrevLocs[pacId][0] = PacMen[pacId][0];
+                        PacMenPrevLocs[pacId][1] = PacMen[pacId][1];
+                        PacMenPrevLocs[pacId][2] = PacMen[pacId][2];
+                    }
+                    
                 }
             }
             int visiblePelletCount = int.Parse(Console.ReadLine()); // all pellets in sight
@@ -135,7 +161,7 @@ class Player
                     pelletPartition = PartitionMap[y,x];
                     if(Pellets.ContainsKey(pelletPartition)) {
                         Pellets[pelletPartition].Add(new int[3]{x, y, value == 1 ? 1 : SUPER_PELLET_VALUE});
-                        Console.Error.WriteLine(string.Format("Adding Pellet[{0}]: [{1},{2}]: {3}", pelletPartition, x, y, value));
+                        // Console.Error.WriteLine(string.Format("Adding Pellet[{0}]: [{1},{2}]: {3}", pelletPartition, x, y, value));
                     }
                 }
                     
@@ -143,6 +169,12 @@ class Player
             initialized = true;
             
             var action = string.Empty;
+            foreach(var blockedPacMan in PacMenBlockLocs) {
+                if(PacMenTargets.ContainsKey(blockedPacMan.Key)){
+                    Console.Error.WriteLine(string.Format("Setting block action: {0} [{1},{2}]",blockedPacMan.Key,PacMenStartLocs[blockedPacMan.Key][0],PacMenStartLocs[blockedPacMan.Key][1]));
+                    PacMenTargets[blockedPacMan.Key] = blockedPacMan.Value;
+                }
+            }
             foreach(var pacManTarget in PacMenTargets) {
                 if(pacManTarget.Value != null) {
                     action += string.Format("MOVE {0} {1} {2}|", pacManTarget.Key, pacManTarget.Value[0], pacManTarget.Value[1]);
@@ -199,5 +231,17 @@ class Player
 
     static int distance(int[] pacMan, int[] pellet) {
         return Math.Abs(pellet[0]-pacMan[0]) + Math.Abs(pellet[1]-pacMan[1]);
+    }
+
+     static int[] getRandomLoc() {
+        var currentChar = '#';
+        var randLoc = new int[3];
+        while (currentChar == '#') {
+            randLoc[0] = rGen.Next(0, MapDimensions[0]);
+            randLoc[1] = rGen.Next(0, MapDimensions[1]);
+            randLoc[2] = BLOCKED_COOLDOWN;
+            currentChar = Map[randLoc[1]][randLoc[0]];
+        }
+        return randLoc;
     }
 }
