@@ -45,7 +45,7 @@ class Player
     static List<int> PacMenBlocked = new List<int>();
 
     static Dictionary<int, int[]> EnemyPacMen = new Dictionary<int, int[]>();
-    static Dictionary<int, List<int[]>> Pellets = new Dictionary<int, List<int[]>>();
+    static Dictionary<int, Dictionary<string, int[]>> Pellets = new Dictionary<int, Dictionary<string, int[]>>();
     static List<int> PartitionStatus = new List<int>();
 
     static void Main(string[] args)
@@ -77,7 +77,7 @@ class Player
         // initialize Pellet Map with empty Lists for pellet location
         // and set all partitions to available
         for(var i = 0; i < 6; i++) {
-            Pellets.Add(i, new List<int[]>());
+            Pellets.Add(i, new Dictionary<string, int[]>());
             PartitionStatus.Add(STATUS_AVAILABLE);
         }
 
@@ -155,7 +155,13 @@ class Player
                     }
 
                     // remove target on enemy hit
-                    // if(!mine && PacMenEn)
+                    if(!mine && EnemyPacMen.ContainsKey(pacId)){
+                        var subPartition = PartitionMap[y,x];
+                        var pelletHash = getPelletHash(x,y);
+                        if(Pellets.ContainsKey(subPartition) && Pellets[subPartition].ContainsKey(pelletHash)){
+                            Pellets[subPartition].Remove(pelletHash);
+                        }
+                    }
 
                     // set target if empty
                     if(mine && PacMenTargets.ContainsKey(pacId) && PacMenTargets[pacId] == null) {
@@ -193,7 +199,7 @@ class Player
                     pelletPartition = PartitionMap[y,x];
                     if(Pellets.ContainsKey(pelletPartition)) {
                         PelletFoundMap[y,x] = true;
-                        Pellets[pelletPartition].Add(new int[3]{x, y, value == 1 ? 1 : SUPER_PELLET_VALUE});
+                        Pellets[pelletPartition].Add(getPelletHash(x,y), new int[3]{x, y, value == 1 ? 1 : SUPER_PELLET_VALUE});
                         
                         // reinitialize closed partition if new Pellets found
                         if(PartitionStatus[pelletPartition] == STATUS_COMPLETE) {
@@ -262,10 +268,11 @@ class Player
         
         var maxValue = int.MinValue;
         var currentValue = int.MinValue;
-        int[] maxPellet = null;
+        var pelletFound = false;
+        KeyValuePair<string, int[]>? maxPellet = null;
         foreach(var pellet in Pellets[pacMan[2]]) {
             
-            currentValue = getLocationValue(pacMan, pellet);
+            currentValue = getLocationValue(pacMan, pellet.Value);
             // Console.Error.WriteLine(string.Format("Max: {0} => Compare Pellet: [{1},{2},{3}] - {4} ",maxValue,pellet[0],pellet[1],pellet[2],currentValue));
             if(currentValue > maxValue) {
                 maxValue = currentValue;
@@ -274,11 +281,11 @@ class Player
             }
         }
 
-        if(Pellets.ContainsKey(pacMan[2])){
-            Pellets[pacMan[2]].Remove(maxPellet);
+        if(Pellets.ContainsKey(pacMan[2]) && maxPellet.HasValue){
+            Pellets[pacMan[2]].Remove(maxPellet.Value.Key);
         }
         
-        return maxPellet;
+        return maxPellet.HasValue ? maxPellet.Value.Value : null;
     }
 
     static int getLocationValue(int[] pacMan, int[] pellet) {
@@ -362,5 +369,9 @@ class Player
             currentChar = Map[randLoc[1]][randLoc[0]];
         }
         return randLoc;
+    }
+
+    static string getPelletHash(int x, int y) {
+        return string.Format("{0}{1}", x, y);
     }
 }
